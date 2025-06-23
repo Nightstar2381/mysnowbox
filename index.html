@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>❄️ MySnowBox | คลังภาพธีมหิมะ</title>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;700&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body {
+      margin: 0;
+      background: linear-gradient(120deg, #e3f0fb 0%, #fafdff 100%);
+      font-family: 'Kanit', 'Inter', sans-serif;
+      color: #204060;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      transition: background 0.3s;
+    }
+    header {
+      background: linear-gradient(90deg, #b7e0fb 10%, #e5f3ff 100%);
+      padding: 2.2rem 0 1.1rem 0;
+      text-align: center;
+      box-shadow: 0 1px 12px #7ec8e31a;
+    }
+    .snow-logo {
+      font-size: 2.6rem;
+      margin-bottom: 0.15rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .web-title {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #2592e5;
+      letter-spacing: 0.06em;
+      text-shadow: 0 2px 18px #bbdff752;
+      margin-bottom: 0.2rem;
+    }
+    main {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 2.5rem 0.5rem 2.5rem 0.5rem;
+    }
+    .card {
+      background: rgba(255,255,255,0.97);
+      border-radius: 1.45rem;
+      box-shadow: 0 4px 44px #a2c2e62a;
+      padding: 2.3rem 2.2rem 2.6rem 2.2rem;
+      max-width: 470px;
+      width: 100%;
+      position: relative;
+    }
+    .section-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #1d7ac3;
+      margin-bottom: 1.4rem;
+      letter-spacing: 0.04em;
+      display: flex;
+      align-items: center;
+      gap: 0.4em;
+    }
+    label {
+      font-weight: bold;
+      font-size: 1rem;
+      margin: 1.1rem 0 0.35rem 0;
+      display: block;
+      color: #247bb9;
+    }
+    .dropdown-row {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      margin-bottom: 0.25rem;
+    }
+    select, input[type="text"] {
+      font-size: 1.07rem;
+      border: 1.5px solid #b3e7fa;
+      border-radius: 1rem;
+      padding: 0.52rem 0.9rem;
+      background: #f3fbff;
+      flex: 1;
+      transition: border 0.22s;
+      box-shadow: 0 1px 4px #bddcf931;
+    }
+    select:focus, input[type="text"]:focus {
+      border-color: #2b90e1;
+      outline: none;
+      background: #e9f7fd;
+    }
+    .add-btn {
+      background: linear-gradient(120deg,#d6f3ff 40%,#d4eafe 100%);
+      border: none;
+      border-radius: 50%;
+      width: 2.2rem; height: 2.2rem;
+      font-size: 1.26rem;
+      color: #29b6f6;
+      cursor: pointer;
+      box-shadow: 0 2px 14px #d4ecfd60;
+      display: flex; justify-content: center; align-items: center;
+      transition: background 0.18s, box-shadow 0.2s;
+    }
+    .add-btn:hover {
+      background: #bae7ff;
+      box-shadow: 0 4px 18px #b7dfff60;
+    }
+    /* Upload Section */
+    .upload-section {
+      margin: 2.1rem 0 1.7rem 0;
+      padding: 1.5rem 0.9rem 1.2rem 0.9rem;
+      background: linear-gradient(120deg, #e5f4ff 70%, #f5fcff 100%);
+      border-radius: 1.2rem;
+      box-shadow: 0 1px 18px #bae6fd28;
+      text-align: center;
+      position: relative;
+    }
+    .file-input {
+      display: block;
+      margin: 0 auto 1rem auto;
+      font-size: 1.05rem;
+      border: none;
+      background: none;
+    }
+    .upload-btn {
+      background: linear-gradient(90deg,#4fc3f7 70%,#80e7ef 100%);
+      color: #fff;
+      border: none;
+      font-size: 1.07rem;
+      padding: 0.72rem 1.8rem;
+      border-radius: 1.45rem;
+      font-weight: bold;
+      letter-spacing: 0.01em;
+      cursor: pointer;
+      box-shadow: 0 1px 8px #90caf970;
+      transition: filter 0.2s, box-shadow 0.15s;
+      outline: none;
+    }
+    .upload-btn:active, .upload-btn:focus {
+      filter: brightness(0.97);
+      box-shadow: 0 2px 14px #90caf977;
+    }
+    .status-message {
+      margin-top: 1.15rem;
+      font-size: 1.01rem;
+      font-weight: 600;
+      color: #2986cc;
+      letter-spacing: 0.04em;
+      min-height: 1.6em;
+    }
+    /* Gallery */
+    .gallery-section {
+      margin-top: 1.6rem;
+    }
+    .gallery-title {
+      color: #1c80c7;
+      font-size: 1.09rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      letter-spacing: 0.02em;
+      display: flex;
+      align-items: center;
+      gap: 0.42em;
+    }
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 1.1rem;
+    }
+    .img-card {
+      background: linear-gradient(120deg,#fafdff 80%,#e4f3fa 100%);
+      border-radius: 1.05rem;
+      box-shadow: 0 2px 14px #b3e5fc35;
+      padding: 0.47rem 0.47rem 0.9rem 0.47rem;
+      text-align: center;
+      font-size: 0.97rem;
+      position: relative;
+      transition: box-shadow 0.17s, transform 0.17s;
+      animation: popin 0.4s;
+    }
+    @keyframes popin {
+      0% { transform: scale(0.8); opacity:0; }
+      90% { transform: scale(1.07); opacity:1; }
+      100% { transform: scale(1); }
+    }
+    .img-card img {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      border-radius: 0.82rem;
+      object-fit: cover;
+      box-shadow: 0 1px 7px #c5eaff4a;
+      margin-bottom: 0.25rem;
+      background: #e5f6fc;
+      transition: box-shadow 0.14s, transform 0.13s;
+    }
+    .img-card img:hover {
+      box-shadow: 0 2px 18px #b7e5fe80;
+      transform: scale(1.04);
+      z-index: 2;
+    }
+    .img-info {
+      margin-top: 0.38rem;
+      font-size: 0.98rem;
+      color: #1779af;
+      font-weight: 500;
+      word-break: break-all;
+    }
+    .img-meta {
+      margin-top: 0.19rem;
+      color: #9bb2c6;
+      font-size: 0.81rem;
+    }
+    .img-link {
+      display: inline-flex;
+      align-items: center;
+      color: #2592e5;
+      margin-top: 0.15rem;
+      font-size: 0.9rem;
+      text-decoration: none;
+      font-weight: 700;
+      gap: 0.25em;
+      transition: text-decoration 0.1s;
+    }
+    .img-link:hover {
+      text-decoration: underline;
+    }
+    .delete-btn {
+      position: absolute;
+      top: 0.29rem; right: 0.32rem;
+      background: linear-gradient(90deg,#ffd6e5 80%,#fff3f7 100%);
+      border: none;
+      border-radius: 50%;
+      width: 1.7rem; height: 1.7rem;
+      color: #e84c88;
+      font-size: 1.1rem;
+      box-shadow: 0 1px 7px #ffdce740;
+      cursor: pointer;
+      z-index: 3;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.16s, color 0.14s;
+    }
+    .delete-btn:hover {
+      background: #ffe8f2;
+      color: #be2e59;
+    }
+    .no-image {
+      color: #a3a3b2;
+      font-size: 1.07rem;
+      padding: 1.2rem 0;
+      text-align: center;
+    }
+    /* Loader */
+    .snow-loader-overlay {
+      position: fixed;
+      z-index: 9999;
+      left: 0; top: 0; right: 0; bottom: 0;
+      background: rgba(220, 240, 255, 0.56);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: background 0.33s;
+    }
+    .snow-loader {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: rgba(255,255,255,0.93);
+      padding: 2.3rem 2.5rem 1.4rem 2.5rem;
+      border-radius: 1.7rem;
+      box-shadow: 0 4px 56px #e1f5fe33;
+      animation: popin 0.8s;
+    }
+    .snowflake {
+      animation: spin-snow 1.22s linear infinite;
+      filter: drop-shadow(0 2px 10px #b3e5fc77);
+    }
+    @keyframes spin-snow {
+      0% { transform: rotate(0deg);}
+      100% { transform: rotate(360deg);}
+    }
+    .snow-loader-text {
+      margin-top: 1.2rem;
+      font-size: 1.13rem;
+      font-weight: 600;
+      color: #2b7bcb;
+      letter-spacing: 0.04em;
+    }
+    /* Footer */
+    footer {
+      background: #e7f4fc;
+      color: #79a7c7;
+      font-size: 0.98rem;
+      text-align: center;
+      padding: 1.35rem 0 0.85rem 0;
+      border-top: 1px solid #c4d5ea29;
+      letter-spacing: 0.01em;
+    }
+    @media (max-width: 540px) {
+      .card { padding: 1rem 0.1rem 1.3rem 0.1rem; }
+      main { padding: 1.3rem 0.01rem 1.5rem 0.01rem; }
+      .gallery-grid { gap: 0.55rem;}
+    }
+  </style>
+</head>
+<body>
+  <!-- Loader Overlay -->
+  <div id="loader" class="snow-loader-overlay" style="display: none;">
+    <div class="snow-loader">
+      <svg class="snowflake" width="58" height="58" viewBox="0 0 58 58" fill="none">
+        <circle cx="29" cy="29" r="26" stroke="#b3e5fc" stroke-width="4" fill="none" opacity="0.16"/>
+        <path d="M29 12V46M12 29H46" stroke="#4fc3f7" stroke-width="4" stroke-linecap="round"/>
+        <path d="M17 17L41 41M41 17L17 41" stroke="#29b6f6" stroke-width="4" stroke-linecap="round"/>
+      </svg>
+      <div class="snow-loader-text">กำลังโหลด...</div>
+    </div>
+  </div>
+  <!-- Header -->
+  <header>
+    <div class="snow-logo">
+      <svg width="38" height="38" viewBox="0 0 38 38" fill="none">
+        <circle cx="19" cy="19" r="17" stroke="#90caf9" stroke-width="3" fill="white" opacity="0.8"/>
+        <path d="M19 6V32M6 19H32" stroke="#29b6f6" stroke-width="3" stroke-linecap="round"/>
+        <path d="M10 10L28 28M28 10L10 28" stroke="#4fc3f7" stroke-width="3" stroke-linecap="round"/>
+      </svg>
+      <span>MySnowBox</span>
+    </div>
+    <div class="web-title">คลังภาพธีมหิมะ</div>
+  </header>
+  <main>
+    <div class="card">
+      <!-- Section 1: User & Category -->
+      <div class="section-title"><i data-lucide="user" style="width:1.3em;height:1.3em;vertical-align:middle;"></i> จัดการผู้ใช้และหมวดหมู่</div>
+      <label for="userSelect"><i data-lucide="user"></i> ชื่อผู้ใช้</label>
+      <select id="userSelect">
+        <option>Pim</option>
+        <option>Nat</option>
+        <option>Beam</option>
+      </select>
+      <label for="mainCatSelect"><i data-lucide="folder"></i> หมวดหลัก</label>
+      <div class="dropdown-row">
+        <select id="mainCatSelect">
+          <option>อาหาร</option>
+          <option>ท่องเที่ยว</option>
+          <option>งานอดิเรก</option>
+        </select>
+        <button class="add-btn" id="addMainCat" title="เพิ่มหมวดหลักใหม่"><i data-lucide="plus"></i></button>
+      </div>
+      <label for="subCatSelect"><i data-lucide="layers"></i> หมวดย่อย</label>
+      <div class="dropdown-row">
+        <select id="subCatSelect">
+          <option>ของหวาน</option>
+          <option>ทะเล</option>
+          <option>ดนตรี</option>
+        </select>
+        <button class="add-btn" id="addSubCat" title="เพิ่มหมวดย่อยใหม่"><i data-lucide="plus"></i></button>
+      </div>
+      <!-- Section 2: Upload -->
+      <div class="upload-section">
+        <input type="file" id="imgFile" accept="image/*" class="file-input">
+        <button class="upload-btn" id="uploadBtn"><i data-lucide="cloud-upload"></i> อัปโหลด</button>
+        <div class="status-message" id="statusMsg"></div>
+      </div>
+      <!-- Section 3: Gallery -->
+      <div class="gallery-section">
+        <div class="gallery-title"><i data-lucide="image"></i> ภาพในหมวดย่อยนี้</div>
+        <div class="gallery-grid" id="galleryGrid">
+          <!-- ตัวอย่างรูปภาพ (นำออกเมื่อเชื่อม backend จริง) -->
+        </div>
+        <div class="no-image" id="noImageMsg" style="display:none;">
+          ⛄️ ยังไม่มีภาพในหมวดย่อยนี้
+        </div>
+      </div>
+    </div>
+  </main>
+  <footer>
+    © 2025 MySnowBox ❄️ | พัฒนาเพื่อทีมเล็กและใช้งานฟรี
+  </footer>
+  <script>
+    lucide.createIcons();
+    // ------- Mock Data ---------
+    let images = [
+      {url: "https://picsum.photos/seed/202/220", user: "Pim", maincat: "อาหาร", subcat: "ของหวาน", time: "2025-06-23 16:35", drive: "https://drive.google.com"},
+      {url: "https://picsum.photos/seed/303/220", user: "Nat", maincat: "อาหาร", subcat: "ของหวาน", time: "2025-06-23 16:37", drive: "https://drive.google.com"},
+      {url: "https://picsum.photos/seed/404/220", user: "Beam", maincat: "ท่องเที่ยว", subcat: "ทะเล", time: "2025-06-23 16:39", drive: "https://drive.google.com"},
+    ];
+
+    // -- Helper: Get current selected maincat+subcat --
+    function getCurrentCategory() {
+      return {
+        main: document.getElementById('mainCatSelect').value,
+        sub: document.getElementById('subCatSelect').value,
+      }
+    }
+    // -- Filter images by selected maincat/subcat --
+    function renderImages() {
+      const grid = document.getElementById('galleryGrid');
+      const {main, sub} = getCurrentCategory();
+      const filtered = images.filter(img => img.maincat === main && img.subcat === sub);
+      grid.innerHTML = filtered.map((img, idx) => `
+        <div class="img-card">
+          <img src="${img.url}" alt="img" loading="lazy">
+          <div class="img-info">${img.user} | ${img.maincat}/${img.subcat}</div>
+          <a class="img-link" href="${img.drive}" target="_blank"><i data-lucide="external-link"></i> เปิดบน Drive</a>
+          <div class="img-meta">🕒 ${img.time}</div>
+          ${img.user === document.getElementById('userSelect').value ?
+            `<button class="delete-btn" title="ลบภาพ" onclick="deleteImg(${idx})"><i data-lucide='trash-2'></i></button>` : ''}
+        </div>
+      `).join('');
+      lucide.createIcons();
+      document.getElementById('noImageMsg').style.display = filtered.length ? "none" : "block";
+    }
+    renderImages();
+
+    // --- Event: Category Change
+    document.getElementById('mainCatSelect').onchange =
+    document.getElementById('subCatSelect').onchange = renderImages;
+    document.getElementById('userSelect').onchange = renderImages;
+
+    // --- Add Main Category
+    document.getElementById('addMainCat').onclick = function() {
+      let newCat = prompt('ชื่อหมวดหลักใหม่:');
+      if (newCat && newCat.trim()) {
+        let sel = document.getElementById('mainCatSelect');
+        let exists = Array.from(sel.options).some(opt => opt.value === newCat);
+        if (!exists) {
+          let opt = document.createElement('option');
+          opt.value = opt.textContent = newCat;
+          sel.appendChild(opt);
+          sel.value = newCat;
+          renderImages();
+        } else {
+          alert('หมวดนี้มีอยู่แล้ว');
+        }
+      }
+    }
+    // --- Add Sub Category
+    document.getElementById('addSubCat').onclick = function() {
+      let newCat = prompt('ชื่อหมวดย่อยใหม่:');
+      if (newCat && newCat.trim()) {
+        let sel = document.getElementById('subCatSelect');
+        let exists = Array.from(sel.options).some(opt => opt.value === newCat);
+        if (!exists) {
+          let opt = document.createElement('option');
+          opt.value = opt.textContent = newCat;
+          sel.appendChild(opt);
+          sel.value = newCat;
+          renderImages();
+        } else {
+          alert('หมวดย่อยนี้มีอยู่แล้ว');
+        }
+      }
+    }
+
+    // --- Upload Image (ตัวอย่าง, เชื่อม backend ใช้ fetch/POST) ---
+    document.getElementById('uploadBtn').onclick = async function() {
+      const fileInput = document.getElementById('imgFile');
+      if (!fileInput.files[0]) {
+        setStatus('กรุณาเลือกรูปภาพก่อนอัปโหลด','red'); return;
+      }
+      showLoader(true);
+      setStatus('');
+      // simulate upload delay
+      setTimeout(() => {
+        let reader = new FileReader();
+        reader.onload = function(e) {
+          // mock: push new image to array
+          images.unshift({
+            url: e.target.result,
+            user: document.getElementById('userSelect').value,
+            maincat: document.getElementById('mainCatSelect').value,
+            subcat: document.getElementById('subCatSelect').value,
+            time: new Date().toLocaleString(),
+            drive: 'https://drive.google.com'
+          });
+          fileInput.value = "";
+          setStatus('อัปโหลดสำเร็จ!','green');
+          renderImages();
+          showLoader(false);
+        };
+        reader.readAsDataURL(fileInput.files[0]);
+      }, 1000);
+
+      // === ตัวอย่างอัปโหลดจริงเชื่อม backend ===
+      /*
+      let fd = new FormData();
+      fd.append('file', fileInput.files[0]);
+      fd.append('user', ...);
+      fd.append('maincat', ...);
+      fd.append('subcat', ...);
+      fetch('https://script.google.com/macros/s/.../exec', { method:'POST', body: fd })
+        .then(res => res.json()).then(data => {
+          ... // add image to gallery
+        });
+      */
+    }
+
+    // --- Delete Image
+    function deleteImg(idx) {
+      if (!confirm('ต้องการลบภาพนี้จริงหรือไม่?')) return;
+      showLoader(true);
+      setTimeout(()=>{
+        // mock: ลบจาก array
+        images.splice(idx,1);
+        renderImages();
+        setStatus('ลบภาพสำเร็จ','green');
+        showLoader(false);
+      }, 600);
+      // จริง: เรียก backend เพื่อลบจาก Drive+Sheets
+    }
+
+    // --- Loader & Status
+    function showLoader(show=true) {
+      document.getElementById('loader').style.display = show ? 'flex' : 'none';
+    }
+    function setStatus(msg, color='') {
+      let el = document.getElementById('statusMsg');
+      el.innerHTML = msg;
+      el.style.color = color==='green' ? '#16b385' : color==='red' ? '#e44747' : '#2986cc';
+      if (msg) setTimeout(()=>{el.innerHTML=''}, 2100);
+    }
+  </script>
+</body>
+</html>
