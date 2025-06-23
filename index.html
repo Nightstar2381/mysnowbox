@@ -29,7 +29,8 @@
     .gallery-title {color:#1c80c7; font-size:1.09rem; font-weight:700; margin-bottom:1rem; letter-spacing:0.02em; display:flex; align-items:center; gap:0.42em;}
     .gallery-grid {display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:1.1rem;}
     .img-card {background:linear-gradient(120deg,#fafdff 80%,#e4f3fa 100%); border-radius:1.05rem; box-shadow:0 2px 14px #b3e5fc35; padding:0.47rem 0.47rem 0.9rem 0.47rem; text-align:center; font-size:0.97rem; position:relative; transition:box-shadow 0.17s, transform 0.17s; animation:popin 0.4s;}
-    @keyframes popin {0%{transform:scale(0.8);opacity:0;} 90%{transform:scale(1.07);opacity:1;} 100%{transform:scale(1);}}
+    @keyframes popin {0%{transform:scale(0.8);opacity:0;} 90%{transform:scale(1.07);opacity:1;} 100%{transform:scale(1);}
+    }
     .img-card img {width:100%; aspect-ratio:1/1; border-radius:0.82rem; object-fit:cover; box-shadow:0 1px 7px #c5eaff4a; margin-bottom:0.25rem; background:#e5f6fc; transition:box-shadow 0.14s, transform 0.13s;}
     .img-card img:hover {box-shadow:0 2px 18px #b7e5fe80; transform:scale(1.04); z-index:2;}
     .img-info {margin-top:0.38rem; font-size:0.98rem; color:#1779af; font-weight:500; word-break:break-all;}
@@ -75,13 +76,12 @@
   <main>
     <div class="card">
       <!-- Section 1: User & Category -->
-      <div class="section-title"><i data-lucide="user" style="width:1.3em;height:1.3em;vertical-align:middle;"></i> จัดการผู้ใช้และหมวดหมู่</div>
+      <div class="section-title"><i data-lucide="user"></i> จัดการผู้ใช้และหมวดหมู่</div>
       <label for="userSelect"><i data-lucide="user"></i> ชื่อผู้ใช้</label>
-      <select id="userSelect">
-        <option>Pim</option>
-        <option>Nat</option>
-        <option>Beam</option>
-      </select>
+      <div class="dropdown-row">
+        <select id="userSelect"></select>
+        <button class="add-btn" id="addUserBtn" title="สร้างชื่อผู้ใช้ใหม่"><i data-lucide="plus"></i></button>
+      </div>
       <label for="mainCatSelect"><i data-lucide="folder"></i> หมวดหลัก</label>
       <div class="dropdown-row">
         <select id="mainCatSelect">
@@ -121,41 +121,30 @@
   </footer>
   <script>
     lucide.createIcons();
-    // เก็บรูปทั้งหมดในระบบ (จะใช้แทนข้อมูลจาก backend)
-    let images = [];
-
-    function getCurrentCategory() {
-      return {
-        main: document.getElementById('mainCatSelect').value,
-        sub: document.getElementById('subCatSelect').value,
+    // ระบบเลือกชื่อผู้ใช้ (จำใน localStorage)
+    const userSelect = document.getElementById('userSelect');
+    const USER_STORAGE_KEY = 'mysnowbox-users';
+    function loadUsers() {
+      let users = JSON.parse(localStorage.getItem(USER_STORAGE_KEY)||'[]');
+      if (!users.length) users = ['Me'];
+      userSelect.innerHTML = users.map(u=>`<option>${u}</option>`).join('');
+    }
+    function addUser(name) {
+      let users = JSON.parse(localStorage.getItem(USER_STORAGE_KEY)||'[]');
+      if (!users.includes(name)) {
+        users.push(name);
+        localStorage.setItem(USER_STORAGE_KEY,JSON.stringify(users));
       }
+      loadUsers();
+      userSelect.value = name;
     }
-
-    // โหลดข้อมูลภาพจาก Google Sheets (optionally)
-    // ในที่นี้ mock data ด้วย local array, คุณสามารถ fetch จาก backend ได้
-    function renderImages() {
-      const grid = document.getElementById('galleryGrid');
-      const {main, sub} = getCurrentCategory();
-      const filtered = images.filter(img => img.maincat === main && img.subcat === sub);
-      grid.innerHTML = filtered.map((img, idx) => `
-        <div class="img-card">
-          <img src="${img.url}" alt="img" loading="lazy">
-          <div class="img-info">${img.user} | ${img.maincat}/${img.subcat}</div>
-          <a class="img-link" href="${img.drive}" target="_blank"><i data-lucide="external-link"></i> เปิดบน Drive</a>
-          <div class="img-meta">🕒 ${img.time}</div>
-          ${img.user === document.getElementById('userSelect').value ?
-            `<button class="delete-btn" title="ลบภาพ" onclick="deleteImg(${idx})"><i data-lucide='trash-2'></i></button>` : ''}
-        </div>
-      `).join('');
-      lucide.createIcons();
-      document.getElementById('noImageMsg').style.display = filtered.length ? "none" : "block";
+    document.getElementById('addUserBtn').onclick = function() {
+      let name = prompt('กรอกชื่อผู้ใช้ใหม่ (ภาษาไทย/อังกฤษก็ได้):');
+      if (name && name.trim()) addUser(name.trim());
     }
-    renderImages();
+    loadUsers();
 
-    document.getElementById('mainCatSelect').onchange =
-    document.getElementById('subCatSelect').onchange =
-    document.getElementById('userSelect').onchange = renderImages;
-
+    // ระบบหมวดหลัก/หมวดย่อย
     document.getElementById('addMainCat').onclick = function() {
       let newCat = prompt('ชื่อหมวดหลักใหม่:');
       if (newCat && newCat.trim()) {
@@ -189,7 +178,7 @@
       }
     }
 
-    // ฟังก์ชันแสดง/ซ่อน Loader
+    // Loader & Status
     function showLoader(show=true) {
       document.getElementById('loader').style.display = show ? 'flex' : 'none';
     }
@@ -199,6 +188,50 @@
       el.style.color = color==='green' ? '#16b385' : color==='red' ? '#e44747' : '#2986cc';
       if (msg) setTimeout(()=>{el.innerHTML=''}, 2100);
     }
+
+    // รูป (จะเติมเมื่ออัปโหลดสำเร็จ)
+    let images = [];
+
+    // แสดงภาพใน Gallery เฉพาะหมวดที่เลือก
+    function getCurrentCategory() {
+      return {
+        main: document.getElementById('mainCatSelect').value,
+        sub: document.getElementById('subCatSelect').value,
+      }
+    }
+    function renderImages() {
+      const grid = document.getElementById('galleryGrid');
+      const {main, sub} = getCurrentCategory();
+      const filtered = images.filter(img => img.maincat === main && img.subcat === sub && img.user === userSelect.value);
+      grid.innerHTML = filtered.map((img, idx) => `
+        <div class="img-card">
+          <img src="${img.url}" alt="img" loading="lazy">
+          <div class="img-info">${img.user} | ${img.maincat}/${img.subcat}</div>
+          <a class="img-link" href="${img.drive}" target="_blank"><i data-lucide="external-link"></i> เปิดบน Drive</a>
+          <div class="img-meta">🕒 ${img.time}</div>
+          <button class="delete-btn" title="ลบภาพ" onclick="deleteImg(${idx})"><i data-lucide='trash-2'></i></button>
+        </div>
+      `).join('');
+      lucide.createIcons();
+      document.getElementById('noImageMsg').style.display = filtered.length ? "none" : "block";
+    }
+
+    // โหลดข้อมูลภาพจาก backend (Sheets/Apps Script)
+    async function fetchImagesFromBackend() {
+      // เปลี่ยน URL นี้ให้ตรงกับ Apps Script (ใช้ path เดียวกับ doGet)
+      const APPS_SCRIPT_URL = 'YOUR_SCRIPT_URL_HERE';
+      try {
+        let res = await fetch(APPS_SCRIPT_URL);
+        let arr = await res.json();
+        images = arr;
+        renderImages();
+      } catch(e) {}
+    }
+    //fetchImagesFromBackend(); // uncomment ถ้าอยากให้โหลดภาพเก่าจาก backend
+
+    document.getElementById('mainCatSelect').onchange =
+    document.getElementById('subCatSelect').onchange =
+    document.getElementById('userSelect').onchange = renderImages;
 
     // ฟังก์ชันอัปโหลดภาพ (เชื่อม Apps Script)
     document.getElementById('uploadBtn').onclick = async function() {
@@ -212,13 +245,16 @@
       showLoader(true);
       setStatus('');
       let fd = new FormData();
-      fd.append('file', fileInput.files[0]);
+      // ตั้งชื่อไฟล์ใหม่ให้สุ่มชื่อไม่ซ้ำ
+      let file = fileInput.files[0];
+      let customName = `${user}-${maincat}-${subcat}-${Date.now()}.${file.name.split('.').pop()}`;
+      fd.append('file', file, customName);
       fd.append('user', user);
       fd.append('maincat', maincat);
       fd.append('subcat', subcat);
 
       // --- เปลี่ยน URL ด้านล่างเป็นของ Apps Script คุณเอง! ---
-      const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxI7Ym4755tbvqbP_5flR-7rbzuIEx0wsBPJxOdMHhOs-C_yIgqlHEX_ZuC7VrwbhS_/exec';
+      const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwvG2ZyIpu-IRaLgu4wVggEEY7Q16ql3nZ31qXREx0AfokO2hKmAPuIeUPlsf6d2K9z/exec';
 
       try {
         let res = await fetch(APPS_SCRIPT_URL, {
@@ -229,12 +265,12 @@
         if (data.status === 'ok') {
           setStatus('อัปโหลดสำเร็จ!','green');
           images.unshift({
-            url: data.url, // url ที่ได้จาก backend (Google Drive)
+            url: data.url,
             user: user,
             maincat: maincat,
             subcat: subcat,
             time: new Date().toLocaleString(),
-            drive: data.url // หรือ url เปิดดูใน Drive
+            drive: data.url
           });
           renderImages();
           fileInput.value = "";
@@ -247,7 +283,6 @@
       showLoader(false);
     }
 
-    // ตัวอย่างการลบรูป (กรณีเชื่อม backend จริง ต้อง implement ที่ backend ด้วย)
     function deleteImg(idx) {
       if (!confirm('ต้องการลบภาพนี้จริงหรือไม่?')) return;
       showLoader(true);
@@ -259,6 +294,9 @@
       }, 600);
       // จริง: เรียก backend เพื่อลบจาก Drive+Sheets ด้วย
     }
+
+    // เริ่มต้นแสดง Gallery
+    renderImages();
   </script>
 </body>
 </html>
