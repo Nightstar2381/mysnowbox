@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MySnowBox Login</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(180deg, #B8E6FF 0%, #87CEEB 30%, #E6F3FF 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Background Decorations */
+        .bg-decoration {
+            position: absolute;
+            color: rgba(255, 255, 255, 0.4);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Top Left Snowflakes */
+        .snowflake-tl1 {
+            top: 5%;
+            left: 5%;
+            font-size: clamp(30px, 4vw, 60px);
+            animation: rotate 8s linear infinite;
+        }
+
+        .snowflake-tl2 {
+            top: 8%;
+            left: 12%;
+            font-size: clamp(25px, 3.5vw, 50px);
+            animation: rotate 6s linear infinite reverse;
+        }
+
+        .snowflake-tl3 {
+            top: 15%;
+            left: 3%;
+            font-size: clamp(20px, 3vw, 40px);
+            animation: rotate 10s linear infinite;
+        }
+
+        /* Top Right Clouds and Elements */
+        .cloud-tr {
+            top: 8%;
+            right: 8%;
+            font-size: clamp(40px, 5vw, 80px);
+            animation: float 4s ease-in-out infinite;
+        }
+
+        .snowflake-tr1 {
+            top: 12%;
+            right: 15%;
+            font-size: clamp(35px, 4vw, 70px);
+            animation: rotate 7s linear infinite;
+        }
+
+        .snowflake-tr2 {
+            top: 20%;
+            right: 5%;
+            font-size: clamp(25px, 3vw, 50px);
+            animation: rotate 9s linear infinite reverse;
+        }
+
+        /* Bottom Right Elements */
+        .truck-br {
+            bottom: 5%;
+            right: 3%;
+            font-size: clamp(30px, 4vw, 60px);
+            animation: bounce 3s ease-in-out infinite;
+        }
+
+        .signpost-br {
+            bottom: 15%;
+            right: 15%;
+            font-size: clamp(35px, 4vw, 70px);
+            animation: sway 5s ease-in-out infinite;
+        }
+
+        /* Animations */
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+
+        @keyframes sway {
+            0%, 100% { transform: rotate(-2deg); }
+            50% { transform: rotate(2deg); }
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: clamp(30px, 5vh, 60px) 20px clamp(20px, 3vh, 40px);
+            position: relative;
+            z-index: 10;
+        }
+
+        .header h1 {
+            font-size: clamp(28px, 6vw, 60px);
+            font-weight: 800;
+            color: rgba(255, 255, 255, 0.95);
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: clamp(5px, 1vh, 15px);
+            letter-spacing: 1px;
+        }
+
+        .header .subtitle {
+            font-size: clamp(20px, 4vw, 40px);
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
+            text-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Main Container */
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: calc(100vh - 200px);
+            padding: 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Login Box */
+        .login-box {
+            background: linear-gradient(135deg, #4FC3F7 0%, #29B6F6 50%, #039BE5 100%);
+            border-radius: clamp(25px, 4vw, 40px);
+            padding: clamp(30px, 5vw, 60px);
+            width: 100%;
+            max-width: 500px;
+            min-height: 400px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+            position: relative;
+            overflow: hidden;
+            animation: containerFloat 6s ease-in-out infinite;
+        }
+
+        @keyframes containerFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+
+        /* Characters Inside Box */
+        .character {
+            position: absolute;
+            z-index: 5;
+        }
+
+        .shoveler {
+            bottom: clamp(15px, 3vw, 30px);
+            left: clamp(15px, 3vw, 30px);
+            font-size: clamp(35px, 6vw, 70px);
+            animation: shovelWork 3s ease-in-out infinite;
+        }
+
+        @keyframes shovelWork {
+            0%, 100% { transform: rotate(-5deg); }
+            50% { transform: rotate(5deg); }
+        }
+
+        .snowman-top {
+            top: clamp(10px, 2vw, 20px);
+            right: clamp(15px, 3vw, 30px);
+            font-size: clamp(25px, 4vw, 50px);
+            animation: snowmanWave 4s ease-in-out infinite;
+        }
+
+        @keyframes snowmanWave {
+            0%, 100% { transform: rotate(-3deg); }
+            50% { transform: rotate(3deg); }
+        }
+
+        /* Snow piles in box */
+        .snow-pile {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50px;
+            animation: snowPulse 4s ease-in-out infinite;
+        }
+
+        .pile1 {
+            bottom: 8px;
+            left: clamp(80px, 15vw, 120px);
+            width: clamp(40px, 8vw, 80px);
+            height: clamp(12px, 2vw, 20px);
+        }
+
+        .pile2 {
+            bottom: 12px;
+            left: clamp(160px, 25vw, 200px);
+            width: clamp(60px, 10vw, 100px);
+            height: clamp(15px, 2.5vw, 25px);
+        }
+
+        @keyframes snowPulse {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.05); }
+        }
+
+        /* Form */
+        .form-container {
+            position: relative;
+            z-index: 10;
+            margin-top: clamp(20px, 4vw, 40px);
+        }
+
+        .input-group {
+            margin-bottom: clamp(15px, 3vw, 25px);
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: clamp(15px, 3vw, 20px) clamp(20px, 4vw, 30px);
+            background: rgba(255, 255, 255, 0.95);
+            border: none;
+            border-radius: 50px;
+            font-size: clamp(14px, 2.5vw, 18px);
+            font-weight: 500;
+            color: #333;
+            outline: none;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .input-group input::placeholder {
+            color: #666;
+            font-weight: 400;
+        }
+
+        .input-group input:focus {
+            background: rgba(255, 255, 255, 1);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            transform: translateY(-3px);
+        }
+
+        /* Login Button */
+        .login-button {
+            width: clamp(150px, 30vw, 200px);
+            padding: clamp(12px, 2.5vw, 18px) 0;
+            background: rgba(255, 255, 255, 0.95);
+            border: none;
+            border-radius: 50px;
+            font-size: clamp(14px, 2.8vw, 20px);
+            font-weight: 600;
+            color: #29B6F6;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            margin: clamp(20px, 4vw, 30px) auto 0;
+            display: block;
+            position: relative;
+            overflow: hidden;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .login-button:hover {
+            background: rgba(255, 255, 255, 1);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+            transform: translateY(-4px);
+        }
+
+        .login-button:active {
+            transform: translateY(-2px);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                min-height: calc(100vh - 150px);
+            }
+            
+            .login-box {
+                margin: 10px;
+                min-height: 350px;
+            }
+            
+            .header {
+                padding: 20px 15px 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .login-box {
+                border-radius: 25px;
+                padding: 25px 20px;
+                min-height: 320px;
+            }
+            
+            .form-container {
+                margin-top: 25px;
+            }
+            
+            .input-group {
+                margin-bottom: 18px;
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .login-box {
+                max-width: 600px;
+                padding: 80px;
+                min-height: 500px;
+            }
+        }
+
+        /* Loading state */
+        .login-button.loading {
+            background: rgba(255, 255, 255, 0.7);
+            color: #666;
+            cursor: not-allowed;
+        }
+
+        .login-button.success {
+            background: rgba(76, 175, 80, 0.9);
+            color: white;
+        }
+
+        /* Falling snow animation */
+        .falling-snow {
+            position: absolute;
+            color: rgba(255, 255, 255, 0.6);
+            pointer-events: none;
+            animation: snowfall linear infinite;
+            z-index: 2;
+        }
+
+        @keyframes snowfall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Decorations -->
+    <div class="bg-decoration snowflake-tl1">❄️</div>
+    <div class="bg-decoration snowflake-tl2">❄️</div>
+    <div class="bg-decoration snowflake-tl3">❄️</div>
+    
+    <div class="bg-decoration cloud-tr">☁️</div>
+    <div class="bg-decoration snowflake-tr1">❄️</div>
+    <div class="bg-decoration snowflake-tr2">❄️</div>
+    
+    <div class="bg-decoration truck-br">🚐</div>
+    <div class="bg-decoration signpost-br">🗺️</div>
+
+    <!-- Header -->
+    <div class="header">
+        <h1>MySnowBox</h1>
+        <div class="subtitle">Login</div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <div class="login-box">
+            <!-- Characters -->
+            <div class="character shoveler">🧑‍🔧</div>
+            <div class="character snowman-top">⛄</div>
+            
+            <!-- Snow piles -->
+            <div class="snow-pile pile1"></div>
+            <div class="snow-pile pile2"></div>
+            
+            <!-- Form -->
+            <div class="form-container">
+                <form id="loginForm">
+                    <div class="input-group">
+                        <input type="text" id="username" placeholder="UserName" required>
+                    </div>
+                    
+                    <div class="input-group">
+                        <input type="password" id="password" placeholder="Password" required>
+                    </div>
+                    
+                    <button type="submit" class="login-button">Login</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Create continuous falling snow
+        function createFallingSnow() {
+            const snowflakes = ['❄️', '❅', '⛄'];
+            const snowflake = document.createElement('div');
+            snowflake.className = 'falling-snow';
+            snowflake.innerHTML = snowflakes[Math.floor(Math.random() * snowflakes.length)];
+            snowflake.style.left = Math.random() * 100 + '%';
+            snowflake.style.fontSize = Math.random() * 15 + 10 + 'px';
+            snowflake.style.animationDuration = Math.random() * 4 + 3 + 's';
+            snowflake.style.animationDelay = Math.random() * 2 + 's';
+            
+            document.body.appendChild(snowflake);
+            
+            setTimeout(() => {
+                if (snowflake.parentNode) {
+                    snowflake.remove();
+                }
+            }, 8000);
+        }
+
+        // Create snow every 500ms
+        setInterval(createFallingSnow, 500);
+
+        // Form handling
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const button = document.querySelector('.login-button');
+            
+            if (username && password) {
+                // Loading state
+                button.textContent = 'Logging in...';
+                button.classList.add('loading');
+                button.disabled = true;
+                
+                // Simulate login process
+                setTimeout(() => {
+                    // Success state
+                    button.textContent = 'Welcome! ❄️';
+                    button.classList.remove('loading');
+                    button.classList.add('success');
+                    
+                    // Create success snow effect
+                    for (let i = 0; i < 10; i++) {
+                        setTimeout(() => {
+                            const particle = document.createElement('div');
+                            particle.innerHTML = '❄️';
+                            particle.style.position = 'absolute';
+                            particle.style.left = Math.random() * window.innerWidth + 'px';
+                            particle.style.top = Math.random() * 100 + 'px';
+                            particle.style.fontSize = '20px';
+                            particle.style.pointerEvents = 'none';
+                            particle.style.animation = 'snowfall 2s linear forwards';
+                            particle.style.zIndex = '1000';
+                            document.body.appendChild(particle);
+                            
+                            setTimeout(() => particle.remove(), 2000);
+                        }, i * 100);
+                    }
+                    
+                    // Reset after 3 seconds
+                    setTimeout(() => {
+                        button.textContent = 'Login';
+                        button.classList.remove('success');
+                        button.disabled = false;
+                        document.getElementById('loginForm').reset();
+                    }, 3000);
+                }, 2000);
+            }
+        });
+
+        // Input focus effects
+        const inputs = document.querySelectorAll('input');
+        inputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                this.style.transform = 'translateY(-3px) scale(1.02)';
+            });
+            
+            input.addEventListener('blur', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+
+        // Responsive font size adjustment
+        function adjustFontSizes() {
+            const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+            const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+            
+            // Adjust background elements based on screen size
+            const bgElements = document.querySelectorAll('.bg-decoration');
+            bgElements.forEach(element => {
+                if (vw < 480) {
+                    element.style.fontSize = '20px';
+                } else if (vw < 768) {
+                    element.style.fontSize = '30px';
+                } else {
+                    // Reset to CSS values
+                    element.style.fontSize = '';
+                }
+            });
+        }
+
+        // Call on load and resize
+        window.addEventListener('load', adjustFontSizes);
+        window.addEventListener('resize', adjustFontSizes);
+
+        // Prevent zoom on mobile inputs
+        if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+            document.addEventListener('touchstart', function() {}, true);
+        }
+    </script>
+</body>
+</html>
