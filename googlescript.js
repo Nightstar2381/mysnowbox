@@ -3,7 +3,7 @@
 // ================================
 
 // ✅ ใส่ URL Web App ที่ได้จากการ Deploy Google Apps Script
-const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxKCGfBSbWXKOXQrYUOuzYPq0FPtYiMj_PIMPBjpNJs1xPzZlbcrxjhaBVwizNvfSdW/exec';
+const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxPTP69ENJx_RXB6V2QGcDW3_DyMUg_Cc7RuNy4uutXMFZMOdTr-zOi6dDxx5-Skc-E/exec';
 
 // ✅ เรียก API จาก GAS
 async function callGASAPI(action, method = 'GET', data = null) {
