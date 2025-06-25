@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>MySnowBox Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: sans-serif;
+      background: linear-gradient(135deg, #e0f7fa, #e1f5fe);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: white;
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    input, button, select {
+      width: 100%;
+      padding: 0.75rem;
+      margin-bottom: 1rem;
+      border-radius: 0.5rem;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+    button {
+      background-color: #2196f3;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #1976d2;
+    }
+    .hidden {
+      display: none;
+    }
+    .error {
+      color: red;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>เข้าสู่ระบบ MySnowBox</h2>
+    <div id="login-section">
+      <input type="text" id="username" placeholder="ชื่อผู้ใช้">
+      <input type="password" id="password" placeholder="รหัสผ่าน">
+      <div class="error" id="login-error"></div>
+      <button onclick="login()">เข้าสู่ระบบ</button>
+    </div>
+
+    <div id="dashboard-section" class="hidden">
+      <h3 id="welcome-msg"></h3>
+      <div id="admin-panel" class="hidden">
+        <h4>เพิ่มผู้ใช้ใหม่</h4>
+        <input type="text" id="new-username" placeholder="ชื่อผู้ใช้ใหม่">
+        <input type="text" id="new-password" placeholder="รหัสผ่าน">
+        <select id="new-role">
+          <option value="user">ผู้ใช้ทั่วไป</option>
+          <option value="admin">ผู้ดูแล</option>
+        </select>
+        <button onclick="addUser()">เพิ่มผู้ใช้</button>
+        <div id="add-status"></div>
+        <hr>
+        <h4>รายชื่อผู้ใช้ทั้งหมด</h4>
+        <ul id="user-list"></ul>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = 'https://script.google.com/macros/s/YOUR_DEPLOY_ID/exec'; // <== ใส่ Web App URL ของคุณ
+
+    async function login() {
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const errorBox = document.getElementById('login-error');
+
+      if (!username || !password) {
+        errorBox.textContent = 'กรุณากรอกชื่อผู้ใช้และรหัสผ่าน';
+        return;
+      }
+
+      const res = await fetch(`${API_URL}?action=login&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`);
+      const data = await res.json();
+
+      if (data.success) {
+        document.getElementById('login-section').classList.add('hidden');
+        document.getElementById('dashboard-section').classList.remove('hidden');
+        document.getElementById('welcome-msg').textContent = `สวัสดีคุณ ${username} (${data.role})`;
+
+        if (data.role === 'admin') {
+          document.getElementById('admin-panel').classList.remove('hidden');
+          loadUsers();
+        }
+      } else {
+        errorBox.textContent = data.message || 'ไม่สามารถเข้าสู่ระบบ';
+      }
+    }
+
+    async function addUser() {
+      const username = document.getElementById('new-username').value.trim();
+      const password = document.getElementById('new-password').value.trim();
+      const role = document.getElementById('new-role').value;
+      const statusBox = document.getElementById('add-status');
+
+      if (!username || !password) {
+        statusBox.textContent = 'กรุณากรอกข้อมูลให้ครบ';
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('action', 'addUser');
+      formData.append('username', username);
+      formData.append('password', password);
+      formData.append('role', role);
+
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        statusBox.textContent = '✅ เพิ่มผู้ใช้เรียบร้อย';
+        loadUsers();
+      } else {
+        statusBox.textContent = '❌ ' + (data.message || 'เกิดข้อผิดพลาด');
+      }
+    }
+
+    async function loadUsers() {
+      const res = await fetch(`${API_URL}?action=getUsers`);
+      const data = await res.json();
+
+      const list = document.getElementById('user-list');
+      list.innerHTML = '';
+      data.users.forEach(user => {
+        const li = document.createElement('li');
+        li.textContent = `${user.username} (${user.role})`;
+        list.appendChild(li);
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,11 +1,9 @@
 // ================================
-// MySnowBox Frontend - Google Apps Script Integration (Complete)
+// MySnowBox Frontend - Folder Management + Delete
 // ================================
 
-// ✅ ใส่ URL Web App ที่ได้จากการ Deploy Google Apps Script
-const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxPTP69ENJx_RXB6V2QGcDW3_DyMUg_Cc7RuNy4uutXMFZMOdTr-zOi6dDxx5-Skc-E/exec';
+const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzub40tiSGk1QS5_iBk3M-6L-X3y78XnFyyR-iQGuV9CtKea5vBQyiugI6tybi4FDxJ/exec';
 
-// ✅ เรียก API จาก GAS
 async function callGASAPI(action, method = 'GET', data = null) {
     try {
         let url = `${GAS_WEB_APP_URL}?action=${action}`;
@@ -35,52 +33,116 @@ async function callGASAPI(action, method = 'GET', data = null) {
     }
 }
 
-// ✅ โหลดข้อมูลจาก GAS
-async function loadDataFromGAS() {
+async function deleteFolder(main, sub = '') {
+    if (!main) return;
+    const confirmed = confirm(`คุณต้องการลบโฟลเดอร์ "${main}${sub ? ' > ' + sub : ''}" หรือไม่?\n\nคำเตือน: การลบนี้จะลบภาพทั้งหมดในโฟลเดอร์ด้วย!`);
+    if (!confirmed) return;
+
     try {
-        showLoader(true);
-
-        const imagesResult = await callGASAPI('getImages');
-        imageData = imagesResult.data || [];
-
-        const categoriesResult = await callGASAPI('getCategories');
-        if (categoriesResult.data) categories = categoriesResult.data;
-
-        const usersResult = await callGASAPI('getUsers');
-        if (usersResult.data && usersResult.data.length > 0) {
-            updateUserOptions(usersResult.data);
-        }
-
-        updateCategoryOptions();
-        loadGallery();
-    } catch (error) {
-        showMessage('โหลดข้อมูลล้มเหลว: ' + error.message, 'error');
-    } finally {
-        showLoader(false);
+        await callGASAPI('deleteCategoryFolder', 'POST', { mainCategory: main, subCategory: sub });
+        showMessage('ลบโฟลเดอร์เรียบร้อย', 'success');
+        loadDriveFoldersToUI();
+    } catch (err) {
+        showMessage('ลบโฟลเดอร์ไม่สำเร็จ: ' + err.message, 'error');
     }
 }
 
-function updateUserOptions(users) {
-    const userSelect = document.getElementById('username');
-    const filterUser = document.getElementById('filterUser');
+async function loadDriveFoldersToUI() {
+    try {
+        const res = await callGASAPI('listDriveFolders');
+        const data = res.data;
 
-    userSelect.innerHTML = '';
-    filterUser.innerHTML = '<option value="">ทุกผู้ใช้</option>';
+        const mainSel = document.getElementById('uploadMainSelect');
+        const subSel = document.getElementById('uploadSubSelect');
+        const link = document.getElementById('folderPreviewLink');
 
-    users.forEach(user => {
-        userSelect.innerHTML += `<option value="${user}">${user}</option>`;
-        filterUser.innerHTML += `<option value="${user}">${user}</option>`;
-    });
+        mainSel.innerHTML = '<option value="">เลือกหมวดหลัก</option>';
+        subSel.innerHTML = '<option value="">เลือกหมวดย่อย</option>';
+
+        const folderListEl = document.getElementById('folderList');
+        folderListEl.innerHTML = '';
+
+        for (const main of data.main) {
+            mainSel.innerHTML += `<option value="${main}">${main}</option>`;
+            folderListEl.innerHTML += `<div style="margin-bottom: 10px;">
+                <strong>📁 ${main}</strong>
+                <button class="btn btn-danger" style="margin-left: 10px; font-size: 12px;" onclick="deleteFolder('${main}')">
+                    <i data-lucide='trash'></i> ลบหมวด
+                </button>
+            </div>`;
+
+            if (data.sub[main]) {
+                for (const sub of data.sub[main]) {
+                    folderListEl.innerHTML += `<div style="margin-left: 30px; margin-bottom: 5px;">
+                        📂 ${sub}
+                        <button class="btn btn-danger" style="margin-left: 10px; font-size: 12px;" onclick="deleteFolder('${main}', '${sub}')">
+                            <i data-lucide='trash'></i> ลบหมวดย่อย
+                        </button>
+                    </div>`;
+                }
+            }
+        }
+
+        mainSel.onchange = () => {
+            const selected = mainSel.value;
+            subSel.innerHTML = '<option value="">เลือกหมวดย่อย</option>';
+            if (data.sub[selected]) {
+                for (const sub of data.sub[selected]) {
+                    subSel.innerHTML += `<option value="${sub}">${sub}</option>`;
+                }
+            }
+            link.href = `https://drive.google.com/drive/folders/${selected}`;
+        };
+
+        subSel.onchange = () => {
+            const main = mainSel.value;
+            const sub = subSel.value;
+            link.href = `https://drive.google.com/drive/folders/${main}/${sub}`;
+        };
+
+        lucide.createIcons();
+    } catch (err) {
+        showMessage('ไม่สามารถโหลดโฟลเดอร์: ' + err.message, 'error');
+    }
 }
 
-// ✅ อัปโหลดภาพไปยัง Google Drive ผ่าน GAS
+function setupFolderCreateUI() {
+    const form = document.getElementById('createFolderForm');
+    form.onsubmit = async (e) => {
+        e.preventDefault();
+        const main = form.querySelector('#newMainCategory').value.trim();
+        const sub = form.querySelector('#newSubCategory').value.trim();
+        if (!main) return showMessage('กรุณาใส่หมวดหลัก', 'error');
+        await createDriveFolders(main, sub);
+        form.reset();
+    };
+}
+
+async function createDriveFolders(mainCategory, subCategory = '') {
+    try {
+        await callGASAPI('createCategoryFolders', 'POST', {
+            mainCategory,
+            subCategory
+        });
+        showMessage('สร้างโฟลเดอร์เรียบร้อย', 'success');
+        loadDriveFoldersToUI();
+    } catch (err) {
+        showMessage('สร้างโฟลเดอร์ผิดพลาด: ' + err.message, 'error');
+    }
+}
+
+function getSelectedFolderCategory() {
+    const main = document.getElementById('uploadMainSelect').value;
+    const sub = document.getElementById('uploadSubSelect').value;
+    return { mainCategory: main, subCategory: sub };
+}
+
 async function uploadImages() {
     const username = document.getElementById('username').value;
-    const mainCat = document.getElementById('mainCategory').value;
-    const subCat = document.getElementById('subCategory').value;
+    const { mainCategory, subCategory } = getSelectedFolderCategory();
     const fileInput = document.getElementById('imageFile');
 
-    if (!username || !mainCat || !subCat || !fileInput.files.length) {
+    if (!username || !mainCategory || !subCategory || !fileInput.files.length) {
         showMessage('กรุณากรอกข้อมูลให้ครบและเลือกไฟล์ภาพ', 'error');
         return;
     }
@@ -98,8 +160,8 @@ async function uploadImages() {
                     const base64Data = e.target.result.split(',')[1];
                     await callGASAPI('uploadImage', 'POST', {
                         username,
-                        mainCategory: mainCat,
-                        subCategory: subCat,
+                        mainCategory,
+                        subCategory,
                         image: base64Data,
                     });
                     successCount++;
@@ -118,7 +180,8 @@ async function uploadImages() {
     loadDataFromGAS();
 }
 
-// ✅ โหลดอัตโนมัติเมื่อเปิดหน้าเว็บ
-document.addEventListener('DOMContentLoaded', function () {
+window.addEventListener('DOMContentLoaded', () => {
     loadDataFromGAS();
+    setupFolderCreateUI();
+    loadDriveFoldersToUI();
 });
