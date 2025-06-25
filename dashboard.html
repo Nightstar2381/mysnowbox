@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <title>แดชบอร์ดแอดมิน - MySnowBox</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: 'Prompt', sans-serif;
+      background: #eef6fb;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #0077b6;
+    }
+    button, input, select {
+      font-family: inherit;
+      font-size: 16px;
+      margin-top: 8px;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background: #0077b6;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #005f8e;
+    }
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .user-form, .filters, .summary {
+      margin-bottom: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+    .image-card {
+      background: #fafafa;
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    }
+    .image-card img {
+      width: 100%;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .image-card button {
+      background: #ff5c5c;
+      margin-top: 8px;
+    }
+    #lightbox {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7);
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+    #lightbox img {
+      max-width: 90%;
+      max-height: 80vh;
+      border-radius: 12px;
+      box-shadow: 0 0 12px #fff;
+    }
+  </style>
+</head>
+<body onload="initDashboard()">
+  <div class="container">
+    <div class="top-bar">
+      <h2>🎛️ แดชบอร์ดแอดมิน - MySnowBox</h2>
+      <button onclick="logout()">🚪 ออกจากระบบ</button>
+    </div>
+
+    <div class="user-form">
+      <h3>👥 จัดการผู้ใช้</h3>
+      <input type="text" id="newUsername" placeholder="Username" />
+      <input type="text" id="newPassword" placeholder="Password" />
+      <select id="newRole">
+        <option value="user">user</option>
+        <option value="admin">admin</option>
+      </select>
+      <button onclick="addUser()">➕ เพิ่มผู้ใช้</button>
+      <table id="userTable">
+        <thead>
+          <tr><th>Username</th><th>Password</th><th>Role</th><th>ลบ</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="summary">
+      <h3>📊 สรุปการใช้งานของผู้ใช้</h3>
+      <table id="summaryTable">
+        <thead>
+          <tr><th>Username</th><th>จำนวนรูปภาพ</th><th>จำนวนโฟลเดอร์</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="filters">
+      <h3>🖼️ รูปภาพทั้งหมด</h3>
+      <label>กรองตามผู้ใช้:</label>
+      <select id="filterUser" onchange="loadImages()"></select>
+      <label>กรองตามหมวด:</label>
+      <select id="filterCategory" onchange="loadImages()"></select>
+    </div>
+
+    <div id="gallery" class="gallery"></div>
+  </div>
+
+  <div id="lightbox" onclick="this.style.display='none'">
+    <img id="lightboxImg" src="" />
+  </div>
+
+  <script>
+    const API_URL = 'https://script.google.com/macros/s/AKfycbxwFD5gzYbM0Rr4FSH5iqeGlctZ1HLtaGNfxmu59SYjfHbLsQrDLNbDi1det98sBCSD/exec';
+    let allImages = [];
+
+    function initDashboard() {
+      const role = localStorage.getItem('mysnowbox_role');
+      if (role !== 'admin') location.href = 'index.html';
+      loadUsers();
+      loadAllImages();
+      loadSummary();
+    }
+
+    function logout() {
+      localStorage.clear();
+      location.href = 'login.html';
+    }
+
+    function addUser() {
+      const username = document.getElementById('newUsername').value.trim();
+      const password = document.getElementById('newPassword').value.trim();
+      const role = document.getElementById('newRole').value;
+      if (!username || !password) return alert('กรุณากรอกข้อมูลให้ครบ');
+      fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'addUser', username, password, role })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) { alert('✅ เพิ่มผู้ใช้เรียบร้อย'); loadUsers(); loadSummary(); }
+        else { alert('⚠️ ' + (data.message || 'เพิ่มผู้ใช้ไม่สำเร็จ')); }
+      });
+    }
+
+    function loadUsers() {
+      fetch(`${API_URL}?action=getAllUsers`)
+        .then(res => res.json())
+        .then(users => {
+          const tbody = document.querySelector('#userTable tbody');
+          tbody.innerHTML = '';
+          users.forEach(user => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${user[0]}</td><td>${user[1]}</td><td>${user[2]}</td>
+              <td><button onclick="deleteUser('${user[0]}')">🗑️</button></td>
+            `;
+            tbody.appendChild(tr);
+          });
+        });
+    }
+
+    function deleteUser(username) {
+      if (!confirm(`ลบผู้ใช้ ${username} หรือไม่?`)) return;
+      fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'deleteUser', username })
+      })
+      .then(res => res.json())
+      .then(data => { if (data.success) { alert('🗑️ ลบสำเร็จ'); loadUsers(); loadSummary(); } });
+    }
+
+    function loadSummary() {
+      fetch(`${API_URL}?action=getFolderStats`)
+        .then(res => res.json())
+        .then(stats => {
+          const tbody = document.querySelector('#summaryTable tbody');
+          tbody.innerHTML = '';
+          stats.forEach(row => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>${row.username}</td><td>${row.files}</td><td>${row.folders}</td>`;
+            tbody.appendChild(tr);
+          });
+        });
+    }
+
+    function loadAllImages() {
+      fetch(`${API_URL}?action=getAllImages`)
+        .then(res => res.json())
+        .then(data => {
+          allImages = data;
+          populateFilters(data);
+          renderImages(data);
+        });
+    }
+
+    function populateFilters(data) {
+      const users = [...new Set(data.map(img => img.username))];
+      const cats = [...new Set(data.map(img => img.category))];
+      const userSelect = document.getElementById('filterUser');
+      const catSelect = document.getElementById('filterCategory');
+      userSelect.innerHTML = '<option value="">ทั้งหมด</option>';
+      catSelect.innerHTML = '<option value="">ทั้งหมด</option>';
+      users.forEach(u => userSelect.innerHTML += `<option value="${u}">${u}</option>`);
+      cats.forEach(c => catSelect.innerHTML += `<option value="${c}">${c}</option>`);
+    }
+
+    function loadImages() {
+      const selectedUser = document.getElementById('filterUser').value;
+      const selectedCat = document.getElementById('filterCategory').value;
+      const filtered = allImages.filter(img =>
+        (!selectedUser || img.username === selectedUser) &&
+        (!selectedCat || img.category === selectedCat)
+      );
+      renderImages(filtered);
+    }
+
+    function renderImages(images) {
+      const gallery = document.getElementById('gallery');
+      gallery.innerHTML = '';
+      images.forEach(img => {
+        const div = document.createElement('div');
+        div.className = 'image-card';
+        div.innerHTML = `
+          <img src="${img.fileUrl}" onclick="showPreview('${img.fileUrl}')" />
+          <small>${img.filename}</small>
+          <small>👤 ${img.username}</small>
+          <small>📂 ${img.category}</small>
+          <small>🕒 ${img.timestamp}</small>
+          <button onclick="deleteImage('${img.fileId}', '${img.username}')">ลบรูป</button>
+        `;
+        gallery.appendChild(div);
+      });
+    }
+
+    function deleteImage(fileId, username) {
+      if (!confirm('ลบรูปภาพนี้หรือไม่?')) return;
+      fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'deleteImage', username, fileId })
+      })
+      .then(res => res.json())
+      .then(() => loadAllImages());
+    }
+
+    function showPreview(url) {
+      const lightbox = document.getElementById('lightbox');
+      const img = document.getElementById('lightboxImg');
+      img.src = url;
+      lightbox.style.display = 'flex';
+    }
+  </script>
+</body>
+</html>
