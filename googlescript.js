@@ -1,11 +1,11 @@
 // ================================
-// MySnowBox Frontend - Google Apps Script Integration
+// MySnowBox Frontend - Google Apps Script Integration (Complete)
 // ================================
 
-// ใส่ URL Web App ที่ได้จากการ Deploy Google Apps Script
+// ✅ ใส่ URL Web App ที่ได้จากการ Deploy Google Apps Script
 const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxKCGfBSbWXKOXQrYUOuzYPq0FPtYiMj_PIMPBjpNJs1xPzZlbcrxjhaBVwizNvfSdW/exec';
 
-// == เรียก API จาก GAS ==
+// ✅ เรียก API จาก GAS
 async function callGASAPI(action, method = 'GET', data = null) {
     try {
         let url = `${GAS_WEB_APP_URL}?action=${action}`;
@@ -35,7 +35,7 @@ async function callGASAPI(action, method = 'GET', data = null) {
     }
 }
 
-// == โหลดข้อมูลภาพ, ผู้ใช้, หมวดหมู่ ==
+// ✅ โหลดข้อมูลจาก GAS
 async function loadDataFromGAS() {
     try {
         showLoader(true);
@@ -54,7 +54,7 @@ async function loadDataFromGAS() {
         updateCategoryOptions();
         loadGallery();
     } catch (error) {
-        showMessage('ไม่สามารถโหลดข้อมูลได้: ' + error.message, 'error');
+        showMessage('โหลดข้อมูลล้มเหลว: ' + error.message, 'error');
     } finally {
         showLoader(false);
     }
@@ -73,7 +73,7 @@ function updateUserOptions(users) {
     });
 }
 
-// == อัปโหลดภาพไปยัง Google Apps Script ==
+// ✅ อัปโหลดภาพไปยัง Google Drive ผ่าน GAS
 async function uploadImages() {
     const username = document.getElementById('username').value;
     const mainCat = document.getElementById('mainCategory').value;
@@ -118,7 +118,7 @@ async function uploadImages() {
     loadDataFromGAS();
 }
 
-// == เรียกโหลดข้อมูลอัตโนมัติเมื่อเปิดหน้าเว็บ ==
-document.addEventListener('DOMContentLoaded', function() {
+// ✅ โหลดอัตโนมัติเมื่อเปิดหน้าเว็บ
+document.addEventListener('DOMContentLoaded', function () {
     loadDataFromGAS();
 });
