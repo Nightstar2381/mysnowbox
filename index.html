@@ -438,7 +438,7 @@
         setInterval(createFallingSnow, 500);
 
         // Form handling
-       const API_URL = 'https://script.google.com/macros/s/AKfycbxwFD5gzYbM0Rr4FSH5iqeGlctZ1HLtaGNfxmu59SYjfHbLsQrDLNbDi1det98sBCSD/exec'; // ใส่ URL GAS Web App
+const API_URL = 'https://script.google.com/macros/s/AKfycbxwFD5gzYbM0Rr4FSH5iqeGlctZ1HLtaGNfxmu59SYjfHbLsQrDLNbDi1det98sBCSD/exec'; // <-- ใส่ Web App URL ของคุณ
 
 document.getElementById('loginForm').addEventListener('submit', function(e) {
   e.preventDefault();
@@ -447,30 +447,34 @@ document.getElementById('loginForm').addEventListener('submit', function(e) {
   const password = document.getElementById('password').value.trim();
   const button = document.querySelector('.login-button');
 
-  if (username && password) {
-    button.textContent = 'กำลังเข้าสู่ระบบ...';
-    button.classList.add('loading');
-    button.disabled = true;
+  if (!username || !password) return alert('กรุณากรอกข้อมูลให้ครบ');
 
-    fetch(API_URL + `?action=login&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`)
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          localStorage.setItem('mysnowbox_user', username);
-          localStorage.setItem('mysnowbox_role', data.role);
-          window.location.href = data.role === 'admin' ? 'dashboard.html' : 'index.html';
-        } else {
-          alert('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
-        }
-      })
-      .catch(() => alert('ไม่สามารถติดต่อเซิร์ฟเวอร์ได้'))
-      .finally(() => {
-        button.textContent = 'Login';
-        button.classList.remove('loading');
-        button.disabled = false;
-      });
-  }
+  button.textContent = 'กำลังตรวจสอบ...';
+  button.classList.add('loading');
+  button.disabled = true;
+
+  fetch(`${API_URL}?action=login&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`)
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        localStorage.setItem('mysnowbox_user', username);
+        localStorage.setItem('mysnowbox_role', data.role);
+        window.location.href = data.role === 'admin' ? 'dashboard.html' : 'main.html';
+      } else {
+        alert('❌ ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      alert('⚠️ ไม่สามารถติดต่อเซิร์ฟเวอร์ได้');
+    })
+    .finally(() => {
+      button.textContent = 'Login';
+      button.classList.remove('loading');
+      button.disabled = false;
+    });
 });
+
 
 
         // Input focus effects
