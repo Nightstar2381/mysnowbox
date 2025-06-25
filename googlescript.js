@@ -2,7 +2,7 @@
 // MySnowBox Frontend - Folder Management + Delete
 // ================================
 
-const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzub40tiSGk1QS5_iBk3M-6L-X3y78XnFyyR-iQGuV9CtKea5vBQyiugI6tybi4FDxJ/exec';
+const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzUI6TGvZ3zJ2hBjOYoJXVvKdsyi8v_UrUG9KoILEkFm1XOO0JyGVAta38gPWdDCYFx/exec';
 
 async function callGASAPI(action, method = 'GET', data = null) {
     try {
