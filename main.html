@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <title>MySnowBox - อัปโหลดรูป</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: 'Prompt', sans-serif;
+      background: linear-gradient(to bottom, #aee1f9, #e0f7ff);
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      padding: 20px;
+      max-width: 800px;
+      margin: auto;
+    }
+    h2 {
+      text-align: center;
+      color: #007acc;
+    }
+    label, small {
+      display: block;
+      margin-top: 10px;
+      color: #333;
+    }
+    input[type="file"],
+    input[type="text"],
+    select,
+    button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+    button {
+      background-color: #00bfff;
+      color: white;
+      border: none;
+      margin-top: 15px;
+    }
+    button:hover {
+      background-color: #0099cc;
+    }
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+    .image-card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .image-card img {
+      width: 100%;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .image-card button {
+      margin-top: 8px;
+      background-color: #ff5c5c;
+    }
+    #loading {
+      display: none;
+      text-align: center;
+      padding: 10px;
+    }
+    @media (max-width: 600px) {
+      .top-bar {
+        flex-direction: column;
+        gap: 10px;
+      }
+    }
+  </style>
+</head>
+<body onload="initUserPage()">
+  <div class="container">
+    <div class="top-bar">
+      <h2>MySnowBox - 👋 สวัสดี <span id="userDisplay"></span></h2>
+      <button onclick="logout()">🚪 ออกจากระบบ</button>
+    </div>
+
+    <label for="folderSelect">📁 เลือกโฟลเดอร์อัปโหลด</label>
+    <select id="folderSelect"></select>
+
+    <label for="newFolder">🆕 หรือสร้างโฟลเดอร์ใหม่</label>
+    <input type="text" id="newFolder" placeholder="ชื่อโฟลเดอร์ใหม่ เช่น งานใหม่/ลูกค้า A" />
+    <button onclick="createFolder()">📂 สร้างโฟลเดอร์</button>
+
+    <label for="fileInput">เลือกรูปภาพ</label>
+    <input type="file" id="fileInput" accept="image/*" />
+    <button onclick="uploadImage()">📤 อัปโหลด</button>
+
+    <div id="currentFolderLabel"></div>
+
+    <button onclick="loadUserImages(true)">👁️ ดูทั้งหมดในหมวดนี้</button>
+    <div id="loading">🌬️ กำลังโหลดข้อมูล...</div>
+    <div id="gallery" class="gallery"></div>
+  </div>
+
+  <script>
+    const API_URL = 'https://script.google.com/macros/s/AKfycbxwFD5gzYbM0Rr4FSH5iqeGlctZ1HLtaGNfxmu59SYjfHbLsQrDLNbDi1det98sBCSD/exec';
+    let currentUsername = '';
+
+    function initUserPage() {
+      const user = localStorage.getItem('mysnowbox_user');
+      const role = localStorage.getItem('mysnowbox_role');
+      if (!user || !role) return location.href = 'login.html';
+      if (role === 'admin') return location.href = 'dashboard.html';
+      currentUsername = user;
+
+      document.getElementById('userDisplay').textContent = user;
+      loadFolders();
+    }
+
+    function logout() {
+      localStorage.clear();
+      location.href = 'login.html';
+    }
+
+    function loadFolders() {
+      fetch(`${API_URL}?action=getUserFolders&username=${currentUsername}`)
+        .then(res => res.json())
+        .then(data => {
+          const select = document.getElementById('folderSelect');
+          select.innerHTML = '';
+          data.forEach(path => {
+            const opt = document.createElement('option');
+            opt.value = path;
+            opt.textContent = path;
+            select.appendChild(opt);
+          });
+          if (data.length > 0) {
+            document.getElementById('currentFolderLabel').textContent = `📂 หมวดปัจจุบัน: ${data[0]}`;
+          }
+          loadUserImages();
+        });
+    }
+
+    function createFolder() {
+      const newFolder = document.getElementById('newFolder').value.trim();
+      if (!newFolder) return alert('กรุณาใส่ชื่อโฟลเดอร์ใหม่');
+
+      fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'createUserFolder',
+          username: currentUsername,
+          category: newFolder
+        })
+      })
+      .then(res => res.json())
+      .then(() => {
+        alert('📁 สร้างโฟลเดอร์สำเร็จ');
+        document.getElementById('newFolder').value = '';
+        loadFolders();
+      });
+    }
+
+    function uploadImage() {
+      const file = document.getElementById('fileInput').files[0];
+      const folderPath = document.getElementById('folderSelect').value;
+      if (!file || !folderPath) return alert('กรุณาเลือกรูปและโฟลเดอร์');
+
+      document.getElementById('currentFolderLabel').textContent = `📂 หมวดปัจจุบัน: ${folderPath}`;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        toggleLoading(true);
+        fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'uploadImage',
+            username: currentUsername,
+            category: folderPath,
+            filename: file.name,
+            base64: e.target.result
+          })
+        })
+        .then(res => res.json())
+        .then(() => {
+          alert('✅ อัปโหลดสำเร็จ!');
+          loadUserImages(true);
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function loadUserImages(showAll = false) {
+      const folderPath = document.getElementById('folderSelect').value;
+      if (!folderPath) return;
+      toggleLoading(true);
+
+      fetch(`${API_URL}?action=getUserImages&username=${currentUsername}`)
+        .then(res => res.json())
+        .then(data => {
+          const gallery = document.getElementById('gallery');
+          gallery.innerHTML = '';
+          const filtered = data.filter(img => img.category === folderPath);
+          const imagesToShow = showAll ? filtered : filtered.slice(0, 3);
+
+          imagesToShow.forEach(img => {
+            const div = document.createElement('div');
+            div.className = 'image-card';
+            div.innerHTML = `
+              <img src="${img.fileUrl}" onclick="window.open('${img.fileUrl}', '_blank')" />
+              <small>${img.filename}</small>
+              <small>📅 ${img.timestamp}</small>
+              <small>📂 ${img.category}</small>
+              <button onclick="deleteImage('${img.fileId}')">🗑️ ลบ</button>
+            `;
+            gallery.appendChild(div);
+          });
+          toggleLoading(false);
+        });
+    }
+
+    function deleteImage(fileId) {
+      if (!confirm('คุณต้องการลบรูปนี้จริงหรือไม่?')) return;
+      toggleLoading(true);
+      fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'deleteImage',
+          username: currentUsername,
+          fileId
+        })
+      })
+      .then(res => res.json())
+      .then(() => loadUserImages(true));
+    }
+
+    function toggleLoading(show) {
+      document.getElementById('loading').style.display = show ? 'block' : 'none';
+    }
+  </script>
+</body>
+</html>
