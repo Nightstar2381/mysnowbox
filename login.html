@@ -438,54 +438,40 @@
         setInterval(createFallingSnow, 500);
 
         // Form handling
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value.trim();
-            const button = document.querySelector('.login-button');
-            
-            if (username && password) {
-                // Loading state
-                button.textContent = 'Logging in...';
-                button.classList.add('loading');
-                button.disabled = true;
-                
-                // Simulate login process
-                setTimeout(() => {
-                    // Success state
-                    button.textContent = 'Welcome! ❄️';
-                    button.classList.remove('loading');
-                    button.classList.add('success');
-                    
-                    // Create success snow effect
-                    for (let i = 0; i < 10; i++) {
-                        setTimeout(() => {
-                            const particle = document.createElement('div');
-                            particle.innerHTML = '❄️';
-                            particle.style.position = 'absolute';
-                            particle.style.left = Math.random() * window.innerWidth + 'px';
-                            particle.style.top = Math.random() * 100 + 'px';
-                            particle.style.fontSize = '20px';
-                            particle.style.pointerEvents = 'none';
-                            particle.style.animation = 'snowfall 2s linear forwards';
-                            particle.style.zIndex = '1000';
-                            document.body.appendChild(particle);
-                            
-                            setTimeout(() => particle.remove(), 2000);
-                        }, i * 100);
-                    }
-                    
-                    // Reset after 3 seconds
-                    setTimeout(() => {
-                        button.textContent = 'Login';
-                        button.classList.remove('success');
-                        button.disabled = false;
-                        document.getElementById('loginForm').reset();
-                    }, 3000);
-                }, 2000);
-            }
-        });
+       const API_URL = 'https://script.google.com/macros/s/XXXXXXXXXXX/exec'; // ใส่ URL GAS Web App
+
+document.getElementById('loginForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value.trim();
+  const button = document.querySelector('.login-button');
+
+  if (username && password) {
+    button.textContent = 'กำลังเข้าสู่ระบบ...';
+    button.classList.add('loading');
+    button.disabled = true;
+
+    fetch(API_URL + `?action=login&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          localStorage.setItem('mysnowbox_user', username);
+          localStorage.setItem('mysnowbox_role', data.role);
+          window.location.href = data.role === 'admin' ? 'dashboard.html' : 'index.html';
+        } else {
+          alert('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
+        }
+      })
+      .catch(() => alert('ไม่สามารถติดต่อเซิร์ฟเวอร์ได้'))
+      .finally(() => {
+        button.textContent = 'Login';
+        button.classList.remove('loading');
+        button.disabled = false;
+      });
+  }
+});
+
 
         // Input focus effects
         const inputs = document.querySelectorAll('input');
