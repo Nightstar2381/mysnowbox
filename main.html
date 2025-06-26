@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <title>MySnowBox - อัปโหลดรูป</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+  <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+
   <style>
     body {
       font-family: 'Prompt', sans-serif;
@@ -70,9 +73,7 @@
       font-size: 16px;
       cursor: pointer;
       box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-    button:hover {
-      background: #0099cc;
+      position: relative;
     }
     .top-bar {
       display: flex;
@@ -116,7 +117,46 @@
     #loading {
       display: none;
       text-align: center;
-      padding: 10px;
+      padding: 20px;
+    }
+    #loading.show {
+      display: block;
+    }
+    .alert-modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #e0f7ff;
+      padding: 25px 30px;
+      border-radius: 20px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+      text-align: center;
+      z-index: 9999;
+      display: none;
+      max-width: 80%;
+    }
+    .alert-modal.show {
+      display: block;
+      animation: fadeIn 0.4s ease-in-out;
+    }
+    .alert-modal h2 {
+      font-size: 20px;
+      margin-bottom: 15px;
+      color: #007acc;
+    }
+    .alert-modal button {
+      background: #29b6f6;
+      color: white;
+      padding: 10px 25px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.9) translate(-50%, -50%); }
+      to { opacity: 1; transform: scale(1) translate(-50%, -50%); }
     }
     @media (max-width: 600px) {
       .top-bar {
@@ -151,18 +191,53 @@
     </div>
     <img id="preview" />
 
-    <button onclick="uploadImage()">📤 อัปโหลด</button>
+    <button id="uploadBtn" onclick="uploadImage()">📤 อัปโหลด</button>
 
     <div id="currentFolderLabel"></div>
 
     <button onclick="loadUserImages(true)">👁️ ดูทั้งหมดในหมวดนี้</button>
-    <div id="loading">🌬️ กำลังโหลดข้อมูล...</div>
+    <div id="loading" style="display: none; text-align:center; padding: 20px;">
+  <lottie-player
+    id="truckLoading"
+    background="transparent"
+    speed="1"
+    style="width: 150px; height: 150px; margin: auto"
+    loop
+    autoplay>
+  </lottie-player>
+  <p>กำลังโหลดข้อมูล...</p>
+</div>
+
+
+
+
     <div id="gallery" class="gallery"></div>
+  </div>
+
+  <div id="alertBox" class="alert-modal">
+    <h2 id="alertMessage">ข้อความแจ้งเตือน</h2>
+    <button onclick="hideAlert()">ตกลง</button>
   </div>
 
   <script>
     const API_URL = 'https://script.google.com/macros/s/AKfycbxwFD5gzYbM0Rr4FSH5iqeGlctZ1HLtaGNfxmu59SYjfHbLsQrDLNbDi1det98sBCSD/exec';
     let currentUsername = '';
+
+    async function loadLottieAnimation() {
+    const response = await fetch('Animation - 1750929146433.json');
+    const animationData = await response.json();
+    const player = document.getElementById('truckLoading');
+    player.load(animationData);
+  }
+  loadLottieAnimation();
+
+function showAlert(msg) {
+      document.getElementById('alertMessage').textContent = msg;
+      document.getElementById('alertBox').classList.add('show');
+    }
+    function hideAlert() {
+      document.getElementById('alertBox').classList.remove('show');
+    }
 
     function initUserPage() {
       const user = localStorage.getItem('mysnowbox_user');
@@ -208,7 +283,7 @@
 
     function createFolder() {
       const newFolder = document.getElementById('newFolder').value.trim();
-      if (!newFolder) return alert('กรุณาใส่ชื่อโฟลเดอร์ใหม่');
+      if (!newFolder) return showAlert('กรุณาใส่ชื่อโฟลเดอร์ใหม่');
 
       fetch(API_URL, {
         method: 'POST',
@@ -220,7 +295,7 @@
       })
       .then(res => res.json())
       .then(() => {
-        alert('📁 สร้างโฟลเดอร์สำเร็จ');
+        showAlert('📁 สร้างโฟลเดอร์สำเร็จ');
         document.getElementById('newFolder').value = '';
         loadFolders();
       });
@@ -252,7 +327,7 @@
     function uploadImage() {
       const file = document.getElementById('fileInput').files[0];
       const folderPath = document.getElementById('folderSelect').value;
-      if (!file || !folderPath) return alert('กรุณาเลือกรูปและโฟลเดอร์');
+      if (!file || !folderPath) return showAlert('⚠️ กรุณาเลือกรูปและโฟลเดอร์');
 
       document.getElementById('currentFolderLabel').textContent = `📂 หมวดปัจจุบัน: ${folderPath}`;
 
@@ -271,7 +346,7 @@
         })
         .then(res => res.json())
         .then(() => {
-          alert('✅ อัปโหลดสำเร็จ!');
+      showAlert('✅ อัปโหลดสำเร็จ!');
           clearImage();
           loadUserImages(true);
         });
